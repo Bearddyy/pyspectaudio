@@ -35,10 +35,10 @@ class Spectrogram(BoxLayout):
         FORMAT = pyaudio.paInt16 # We use 16bit format per sample
         CHANNELS = 1
         RATE = int(44100)
-        CHUNK = 2048 # 1024bytes of data red from a buffer
+        CHUNK = 4086 #2048 # 1024bytes of data red from a buffer
 
         OFFSET = 3
-        LEN = 500 # 4
+        LEN = 4 #500 # 4
         
         p = pyaudio.PyAudio()
         np.seterr(divide = 'ignore')
@@ -50,16 +50,17 @@ class Spectrogram(BoxLayout):
             # and make sure it's not imaginary
             try:
                 dfft = abs(np.fft.rfft(audio_data))#10*np.log10(abs(np.fft.rfft(audio_data)))
-                #dfft = dfft[2:len(dfft)//LEN]
-                #dfft = dfft.reshape(-1, LEN).mean(axis=1)
-                dfft = dfft[OFFSET:OFFSET+LEN]
+                dfft = np.ceil(dfft, LEN)
+                print(len(self.dfft))
+                dfft = dfft.reshape(-1, LEN).mean(axis=1)
+                #dfft = dfft[OFFSET:OFFSET+LEN]
                 try:
                     self.dfft = [((self.dfft[i]*0.8) + (dfft[i] * 0.2) )for i in range(len(dfft))]
                 except:
                     self.dfft = dfft
             except:
                 pass
-            print(len(self.dfft))
+            
 
     def updateSize(self):
         size = Window.size
